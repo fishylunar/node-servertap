@@ -1,0 +1,21 @@
+{
+    "type": "module",
+    "dependencies": {
+        "jest": "^29.7.0",
+        "node-fetch": "^3.3.2"
+    },
+    "name": "node-servertap",
+    "version": "1.0.0",
+    "description": "NodeJS library for ServerTap",
+    "main": "index.js",
+    "scripts": {
+        "test": "node test.js"
+    },
+    "keywords": [
+        "minecraft",
+        "servertap",
+        "rest"
+    ],
+    "author": "fishylunar",
+    "license": "ISC"
+}
