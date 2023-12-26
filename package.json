@@ -4,6 +4,7 @@
         "node-fetch": "^3.3.2",
         "ws": "^8.15.1"
     },
+    "repository": "https://github.com/fishylunar/node-servertap",
     "devDependencies": {
         "jest": "^29.7.0"
     },
