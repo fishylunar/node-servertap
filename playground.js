@@ -1,4 +1,4 @@
-import { servertap, endpoints } from "./index.js";
+import { servertap, websocket } from "./index.js";
 
 const s = new servertap("coralcave.xyz", "4567", "change_me")
-console.log(await s.player.get.allOnline())
+console.log(await s.server.get())

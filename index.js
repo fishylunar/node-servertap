@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-
+import WebSocket from 'ws';
 /**
  * API Endpoints for ServerTap
  */
@@ -56,6 +56,7 @@ class servertap {
         this.apiKey = apiKey;
 
         this.advencements = new __AdvencementsClass(this)
+        this.server = new __serverClass(this)
         this.chat = new __chatClass(this)
         this.economy = new __economyClass(this)
 
@@ -68,16 +69,50 @@ class servertap {
     }
 
 }
+
+/**
+ * Websocket class
+ */
+class websocket {
+    /**
+     * @param {servertap} servertapInstance Instanceof the servertap client.
+     */
+    constructor(servertapInstance) {
+        this.servertapInstance = servertapInstance
+    }
+
+    /**
+     * Init the websocket
+     * @param {Boolean} tls Weather or not to use TLS
+     * @returns {WebSocket} WebSocket object
+     */
+    init(tls = false) {
+        return new WebSocket(`${tls ? "wss" : "ws"}://${this.servertapInstance.baseURL}:${this.servertapInstance.port}/v1/ws/console`, {
+            headers: {
+                Cookie: "x-servertap-key=" + this.servertapInstance.apiKey
+            }
+        });
+    }
+}
+
+/**
+ * Advancements
+ */
 class __AdvencementsClass {
     constructor(servertapInstance) {
         this.servertapInstance = servertapInstance
     }
+
+    /**
+     * Advancements
+     * @returns {JSON} Gets all server advancements.
+     */
     get() {
         return webRequest(this.servertapInstance, endpoints.advancements, "GET")
     }
 }
 /**
- * Class containing Chat functions called as .chat
+ * Class containing Chat functions
  */
 class __chatClass {
     constructor(servertapInstance) {
@@ -85,7 +120,7 @@ class __chatClass {
     }
 
     /**
-     * Broadcast a message to everyone
+     * Send broadcast visible to those currently onliene.
      * @param {String} message Message to be broadcast
      */
     broadcast(message) {
@@ -105,12 +140,31 @@ class __economyClass {
     constructor(servertapInstance) {
         this.servertapInstance = servertapInstance
     }
+
+    /**
+     * Economy
+     * @returns {JSON} Economy plugin information
+     */
     info() {
         return webRequest(servertapInstance, endpoints.economy.info, "GET")
     }
+
+    /**
+     * Debit a player
+     * @param {String} uuid Player UUID
+     * @param {Number} amount Amount
+     * @returns {JSON} Response
+     */
     debit(uuid, amount) {
         return webRequest(this.servertapInstance, endpoints.economy.debit, "POST", `uuid=${uuid}&amount=${amount}`)
     }
+
+    /**
+     * Pay a player
+     * @param {String} uuid Player UUID
+     * @param {Number} amount Amount
+     * @returns {JSON} Response
+     */
     pay(uuid, amount) {
         return webRequest(this.servertapInstance, endpoints.economy.pay, "POST", `uuid=${uuid}&amount=${amount}`)
     }
@@ -173,29 +227,32 @@ class __player_getClass {
  */
 class __player_opClass {
     constructor(servertapInstance) {
-            this.servertapInstance = servertapInstance.servertapInstance // Im not sure why we need to do it like this.
-                // My theory is its because of the nested nested classes xd
-        }
-        /**
-         * Get all OPs / Admins
-         * @returns {JSON} Object with OPs / Admins
-         */
+        this.servertapInstance = servertapInstance.servertapInstance // Im not sure why we need to do it like this.
+            // My theory is its because of the nested nested classes xd
+    }
+
+    /**
+     * Get all OPs / Admins
+     * @returns {JSON} Object with OPs / Admins
+     */
     get() {
-            return webRequest(this.servertapInstance, endpoints.player.ops, "GET")
-        }
-        /**
-         * OP someone
-         * @param {String} player Target player UUID
-         * @returns {JSON} Returns any errors
-         */
+        return webRequest(this.servertapInstance, endpoints.player.ops, "GET")
+    }
+
+    /**
+     * OP someone
+     * @param {String} player Target player UUID
+     * @returns {JSON} Returns any errors
+     */
     add(player) {
-            return webRequest(this.servertapInstance, endpoints.player.ops, "POST", `playerUuid=${player}`)
-        }
-        /**
-         * De-OP someone
-         * @param {String} player Target player UUID
-         * @returns {JSON} Returns any errors
-         */
+        return webRequest(this.servertapInstance, endpoints.player.ops, "POST", `playerUuid=${player}`)
+    }
+
+    /**
+     * De-OP someone
+     * @param {String} player Target player UUID
+     * @returns {JSON} Returns any errors
+     */
     remove(player) {
         return webRequest(this.servertapInstance, endpoints.player.ops, "DELETE", `playerUuid=${player}`)
     }
@@ -203,20 +260,22 @@ class __player_opClass {
 
 class __pluginClass {
     constructor(servertapInstance) {
-            this.servertapInstance = servertapInstance;
-        }
-        /**
-         * Get all plugins
-         * @returns {JSON} Object containing plugins
-         */
+        this.servertapInstance = servertapInstance;
+    }
+
+    /**
+     * Get all plugins
+     * @returns {JSON} Object containing plugins
+     */
     get() {
-            return webRequest(this.servertapInstance, endpoints.plugins, "GET")
-        }
-        /**
-         * Install a plugin
-         * @param {String} url URL to the plugin JAR file
-         * @returns {JSON} Returns any errors
-         */
+        return webRequest(this.servertapInstance, endpoints.plugins, "GET")
+    }
+
+    /**
+     * Install a plugin
+     * @param {String} url URL to the plugin JAR file
+     * @returns {JSON} Returns any errors
+     */
     add(url) {
         return webRequest(this.servertapInstance, endpoints.plugins, "POST", `downloadUrl=${encodeURI(url)}`)
     }
@@ -228,12 +287,29 @@ class __serverClass {
         this.whitelist = new __serverWhitelistClass(this)
         this.worlds = new __serverWorldsClass(this)
     }
+
+    /**
+     * Get information about the server
+     * @returns {JSON} Server Info
+     */
     get() {
         return webRequest(this.servertapInstance, endpoints.server.info, "GET")
     }
+
+    /**
+     * Execute a command on the server
+     * @param {String} command 
+     * @param {Number} time 
+     * @returns Response
+     */
     executeCommand(command, time) {
         return webRequest(this.servertapInstance, endpoints.server.exec, "POST", `command=${command}&time=${time}`)
     }
+
+    /**
+     * Ping
+     * @returns {JSON} Ping
+     */
     ping() {
         return webRequest(this.servertapInstance, endpoints.server.ping, "GET")
     }
@@ -288,7 +364,6 @@ class __serverWorldsClass {
  * @returns {Promise} Promise of JSON object response from the server
  */
 function webRequest(instance, endpoint, method, body = undefined) {
-    console.log("WR", endpoint)
     return new Promise((resolve, reject) => {
         const requestOptions = {
             method,
@@ -312,4 +387,4 @@ function webRequest(instance, endpoint, method, body = undefined) {
     });
 }
 
-export { servertap, endpoints }
+export { servertap, endpoints, websocket }

@@ -1,8 +1,11 @@
 {
     "type": "module",
     "dependencies": {
-        "jest": "^29.7.0",
-        "node-fetch": "^3.3.2"
+        "node-fetch": "^3.3.2",
+        "ws": "^8.15.1"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0"
     },
     "name": "node-servertap",
     "version": "1.0.0",
