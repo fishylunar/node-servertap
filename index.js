@@ -47,8 +47,8 @@ class servertap {
     /**
      * ServerTap instance
      * @param {String} baseURL IP or URL to the ServerTap enabled server
-     * @param {String} port The ServerTap Web API port
-     * @param {String} apiKey Your password / API Key
+     * @param {String} port default: 4567 - The ServerTap Web API port
+     * @param {String} apiKey default: "change_me" - Your password / API Key
      */
     constructor(baseURL, port, apiKey) {
         this.baseURL = baseURL;
@@ -105,7 +105,7 @@ class __AdvencementsClass {
 
     /**
      * Advancements
-     * @returns {JSON} Gets all server advancements.
+     * {Promise<JSON>} Gets all server advancements.
      */
     get() {
         return webRequest(this.servertapInstance, endpoints.advancements, "GET")
@@ -143,7 +143,7 @@ class __economyClass {
 
     /**
      * Economy
-     * @returns {JSON} Economy plugin information
+     * {Promise<JSON>} Economy plugin information
      */
     info() {
         return webRequest(servertapInstance, endpoints.economy.info, "GET")
@@ -153,7 +153,7 @@ class __economyClass {
      * Debit a player
      * @param {String} uuid Player UUID
      * @param {Number} amount Amount
-     * @returns {JSON} Response
+     * {Promise<JSON>} Response
      */
     debit(uuid, amount) {
         return webRequest(this.servertapInstance, endpoints.economy.debit, "POST", `uuid=${uuid}&amount=${amount}`)
@@ -163,7 +163,7 @@ class __economyClass {
      * Pay a player
      * @param {String} uuid Player UUID
      * @param {Number} amount Amount
-     * @returns {JSON} Response
+     * {Promise<JSON>} Response
      */
     pay(uuid, amount) {
         return webRequest(this.servertapInstance, endpoints.economy.pay, "POST", `uuid=${uuid}&amount=${amount}`)
@@ -191,14 +191,14 @@ class __player_getClass {
         }
         /**
          * Get all online players
-         * @returns {JSON} Object containing all currently online players
+         * {Promise<JSON>} Object containing all currently online players
          */
     allOnline() {
             return webRequest(this.servertapInstance, endpoints.player.get.allOnline, "GET")
         }
         /**
          * Get ALL players
-         * @returns {JSON} Object containing ALL players
+         * {Promise<JSON>} Object containing ALL players
          */
     all() {
             return webRequest(this.servertapInstance, endpoints.player.get.all, "GET")
@@ -206,7 +206,7 @@ class __player_getClass {
         /**
          * Get online player by their UUID
          * @param {String} playerUUID Minecraft player uuid
-         * @returns {JSON} Player Object
+         * {Promise<JSON>} Player Object
          */
     uuid(playerUUID) {
             return webRequest(this.servertapInstance, endpoints.player.get.uuid + playerUUID, "GET")
@@ -215,7 +215,7 @@ class __player_getClass {
          * Get inventory from online player by their UUID and their world UUID
          * @param {String} playerUUID Minecraft player uuid
          * @param {String} worldUUID Minecraft world uuid
-         * @returns {JSON} World Object
+         * {Promise<JSON>} World Object
          */
     inventory(playerUUID, worldUUID) {
         return webRequest(this.servertapInstance, endpoints.player.get.inventory + playerUUID + "/" + worldUUID, "GET")
@@ -233,7 +233,7 @@ class __player_opClass {
 
     /**
      * Get all OPs / Admins
-     * @returns {JSON} Object with OPs / Admins
+     * {Promise<JSON>} Object with OPs / Admins
      */
     get() {
         return webRequest(this.servertapInstance, endpoints.player.ops, "GET")
@@ -242,7 +242,7 @@ class __player_opClass {
     /**
      * OP someone
      * @param {String} player Target player UUID
-     * @returns {JSON} Returns any errors
+     * {Promise<JSON>} Returns any errors
      */
     add(player) {
         return webRequest(this.servertapInstance, endpoints.player.ops, "POST", `playerUuid=${player}`)
@@ -251,7 +251,7 @@ class __player_opClass {
     /**
      * De-OP someone
      * @param {String} player Target player UUID
-     * @returns {JSON} Returns any errors
+     * {Promise<JSON>} Returns any errors
      */
     remove(player) {
         return webRequest(this.servertapInstance, endpoints.player.ops, "DELETE", `playerUuid=${player}`)
@@ -265,7 +265,7 @@ class __pluginClass {
 
     /**
      * Get all plugins
-     * @returns {JSON} Object containing plugins
+     * {Promise<JSON>} Object containing plugins
      */
     get() {
         return webRequest(this.servertapInstance, endpoints.plugins, "GET")
@@ -274,7 +274,7 @@ class __pluginClass {
     /**
      * Install a plugin
      * @param {String} url URL to the plugin JAR file
-     * @returns {JSON} Returns any errors
+     * {Promise<JSON>} Returns any errors
      */
     add(url) {
         return webRequest(this.servertapInstance, endpoints.plugins, "POST", `downloadUrl=${encodeURI(url)}`)
@@ -290,7 +290,7 @@ class __serverClass {
 
     /**
      * Get information about the server
-     * @returns {JSON} Server Info
+     * {Promise<JSON>} Server Info
      */
     get() {
         return webRequest(this.servertapInstance, endpoints.server.info, "GET")
@@ -308,7 +308,7 @@ class __serverClass {
 
     /**
      * Ping
-     * @returns {JSON} Ping
+     * @returns {Promise<JSON>} Ping
      */
     ping() {
         return webRequest(this.servertapInstance, endpoints.server.ping, "GET")

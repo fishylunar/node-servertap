@@ -1,54 +1,39 @@
 # node-servertap
- NodeJS Library for the Minecraft server plugin ServerTap
+ NodeJS Library for the Minecraft server plugin ServerTap (https://servertap.io)
 
- Websocket implemented!
- use:
+ Ussage example:
  ```js
- import { servertap, websocket } from "./index.js";
- const st = new servertap("<host>", "<port>", "<key>")
- const ws = new websocket(st /* The servertap client instance*/).init(false /* Use TLS? */)
- wss.on('connection', function connection(ws) {
-  ws.on('error', console.error);
+// Import the package - npm i node-servertap
+import { servertap, websocket } from "node-servertap";
 
-  ws.on('message', function message(data) {
-    console.log('received: %s', data);
-  });
+// Create our instance
+const instance = new servertap(
+    "localhost", // Server IP / domain
+    "4567", // ServerTap port, Default is 4567
+    "change_me" // ServerTap key, Default is "change_me"
+    )
 
-  ws.send('something');
-});
+// Using await
+console.log(await instance.server.ping()) // Returns "pong"
 
-// the varible declared here as st (The servertap instance) contains all the 
-// endpoints and actual functions. EG:
-st.server.get()
-// Gets basic server info
+// Promises
+instance.server.whitelist.get().then(result => {
+    console.log(result) // Returns the server whitelist as an Array of Objects
+})
+
+// How to use the websocket:
+// Import "wehsocket" from node-servertap, then create a new ws like this:
+const ws = new websocket(
+    instance // Our servertap instance from before
+    ).init(
+        false // Wether or not to use TLS
+        )
+
+// Then use it as you normally would, for example
+ws.on("open", (stream) => {
+    console.log("Connected!")
+
+    // send commands
+    ws.send("say hi from node")
+})
  ```
- 
- Endpoints implemented: 
-- advancements: `v1/advancements`
-- chat
-  - broadcast: `v1/chat/broadcast`
-  - tell: `v1/chat/tell`
-- economy
-  - info: `v1/economy`
-  - debit: `v1/economy/debit`
-  - pay: `v1/economy/pay`
-- placeholderapi: `v1/placeholders/replace`
-- player
-  - get
-    - allOnline: `v1/players`
-    - all: `v1/players/all`
-    - uuid: `v1/players/`
-    - inventory: `v1/players/`
-  - ops: `v1/server/ops`
-- plugins: `v1/plugins`
-- server
-  - ping: `v1/ping`
-  - scoreboard: `v1/scoreboard`
-  - exec: `v1/server/exec`
-  - info: `v1/server`
-  - whitelist: `v1/server/whitelist`
-- worlds
-  - all: `v1/worlds`
-  - worlds: `v1/worlds/`
-  - download: `v1/worlds/download`
-  - save: `v1/worlds/save`
