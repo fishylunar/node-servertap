@@ -6,10 +6,11 @@
     },
     "repository": "https://github.com/fishylunar/node-servertap",
     "devDependencies": {
+        "ansicolor": "^2.0.1",
         "jest": "^29.7.0"
     },
     "name": "node-servertap",
-    "version": "1.0.3",
+    "version": "1.0.5",
     "description": "NodeJS library for ServerTap",
     "main": "index.js",
     "scripts": {

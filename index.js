@@ -93,6 +93,121 @@ class websocket {
             }
         });
     }
+
+    /**
+     * Returns false if input is NOT a death message / event
+     * @param {{message:string,timestampMillis:number,loggerName:string,level:string}} data 
+     * @param {String[]} players Array with Player objects
+     * @returns {{displayName:string,message:string} | false}
+     */
+    parseDeath(data, players) {
+        let result = false;
+        if (data.loggerName == '' | !"net.minecraft.server.MinecraftServer") { return false }
+
+        // We asume its a death message.
+        /** @type {string[]} - Array of strings (Player DisplayNames) */
+        let playerNames = []
+        players.forEach(player => {
+                /** @type {string[]} - A players display name, split into each char*/
+                let splitPlayerName = player.displayName.split("")
+                let index = 0
+                splitPlayerName.forEach(letter => {
+                    if (letter == "§") {
+                        splitPlayerName.splice(index, 2)
+                    }
+                    index++;
+                })
+                playerNames.push(splitPlayerName.join(""))
+            })
+            /** @type {{displayName:string,message:string} | undefined} */
+        let deadPlayerMessage = undefined;
+        playerNames.forEach(player => {
+            if (` ${data.message.replace(/\'/g," ")}`.includes(` ${player} `)) {
+                deadPlayerMessage = { displayName: player, message: data.message }
+            }
+        })
+
+        // We found the dead player name
+        if (typeof deadPlayerMessage == 'object') {
+            // Handle death message
+            result = deadPlayerMessage
+                // return console.log("💀", deadPlayerMessage.displayName, "died. |", deadPlayerMessage.message)
+        }
+        return result
+    }
+
+    /**
+     * Returns false if iinput was not a join / leave event. 
+     * @param {{message:string,timestampMillis:number,loggerName:string,level:string}} data 
+     * @returns {{type:string,player:string} | false}
+     */
+    parseConnections(data) {
+        let result = false;
+        if (!data.loggerName == "net.minecraft.server.MinecraftServer") { return false }
+        if (data.message.includes("Preparing start region")) { return false }
+        if (data.message.endsWith("joined the game")) {
+            // Join event
+            let player = data.message.replace(" joined the game", "")
+            result = { type: "JOIN", player: player }
+        } else if (data.message.endsWith("left the game")) {
+            // Leave event
+            let player = data.message.replace(" left the game", "")
+            result = { type: "LEAVE", player: player }
+        }
+        return result
+    }
+
+    /**
+     * Returns false if input is not a command event
+     * @param {{message:string,timestampMillis:number,loggerName:string,level:string}} data 
+     * @returns {{player:string,command:string} | false}
+     */
+    parseCommand(data) {
+        if (data.loggerName == "net.minecraft.server.network.PlayerConnection") {
+            // Handle player used command
+            if (data.message.includes(" issued server command: ")) {
+                let player = data.message.split(" issued server command: ")[0]
+                let command = data.message.split(" issued server command: ")[1]
+                return { player: player, command: command }
+            } else { return false }
+        } else { return false }
+    }
+
+    /**
+     * return false if not a chat msg, otherwise return object
+     * @param {{message:string,timestampMillis:number,loggerName:string,level:string}} data 
+     * @param {string} chatSep String used to divide Prefix, DisplayName, and Message from eachother. Default: " > "
+     * @returns {{content:string, author:string, authorPrefix:string} | false} 
+     */
+    parseChat(data, chatSep = " > ") {
+        if (data.message.includes(chatSep)) {
+            let chat = data.message.split(chatSep)
+            if (!chat[2]) { return false } // Filter out messages from non players (They will be moved to the parseLog() function)
+            return {
+                content: chat[2],
+                author: chat[1],
+                authorPrefix: chat[0]
+            }
+        } else { return false }
+    }
+    parseLog(data) {
+        let result = false;
+        switch (data.level) {
+            case "INFO":
+                result = ["💠", data.message]
+                break;
+            case "WARN":
+                result = ["⚠️", data.message]
+                break;
+            case "ERROR":
+                result = ["⛔", data.message]
+                break;
+            default:
+                result = ["=== Unknown Event ===", data]
+                break;
+        }
+        return result
+    }
 }
 
 /**
