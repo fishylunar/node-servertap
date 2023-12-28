@@ -190,6 +190,12 @@ class websocket {
             }
         } else { return false }
     }
+
+    /**
+     * 
+     * @param {{message:string,timestampMillis:number,loggerName:string,level:string}} data 
+     * @returns {[string, string|object] | false}
+     */
     parseLog(data) {
         let result = false;
         switch (data.level) {
